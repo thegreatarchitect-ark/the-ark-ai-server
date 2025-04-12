@@ -51,7 +51,7 @@ Format the response as JSON like:
 `;
 
     const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
+      model: "gpt-4o-2024-05-13",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
