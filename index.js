@@ -1,6 +1,7 @@
+// index.js
 const express = require('express');
 const cors = require('cors');
-const { OpenAI } = require('openai');
+const OpenAI = require('openai'); // With openai@beta installed
 require('dotenv').config();
 
 const app = express();
@@ -9,7 +10,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// ✅ OpenAI Initialization
+// ✅ Initialize OpenAI client (sk-proj-... compatible)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -36,8 +37,8 @@ Summary: "${summary}"
 Return:
 1. A compelling title.
 2. 3–5 cell ideas, each with:
-  - title
-  - content (explanation or insight)
+   - title
+   - content (explanation or insight)
 
 Format the response as JSON like:
 {
@@ -49,38 +50,34 @@ Format the response as JSON like:
 }
 `;
 
-    const completion = await openai.chat.completions.create({
+    const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
 
-    const raw = completion.choices[0].message.content;
+    const raw = chatCompletion.choices[0].message.content;
 
     try {
       const parsed = JSON.parse(raw);
       res.json(parsed);
-    } catch (jsonErr) {
-      console.error("❌ Failed to parse JSON:", jsonErr.message);
+    } catch (jsonError) {
+      console.error("❌ Failed to parse JSON:", jsonError.message);
+      console.error("⚠️ Raw AI Response:", raw);
       res.status(500).json({ error: "Invalid AI JSON output" });
     }
-
   } catch (err) {
-    // ✅ Improved Error Logging
-    if (err.response) {
-      console.error("🔴 OpenAI API Error:", err.response.status, err.response.data);
-      res.status(500).json({ error: err.response.data });
+    if (err.status) {
+      console.error("🔴 OpenAI API Error:", err.status, err.message);
+      res.status(err.status).json({ error: err.message });
     } else {
-      console.error("❌ OpenAI Request Failed:", err.message);
-      res.status(500).json({ error: err.message });
+      console.error("❌ Unknown Error:", err.message);
+      res.status(500).json({ error: "AI request failed" });
     }
   }
 });
 
 // ✅ Start the server
 app.listen(port, () => {
-  console.log(`🚀 AI server listening on port ${port}`);
+  console.log(`🚀 AI server is running on port ${port}`);
 });
-
-
-
