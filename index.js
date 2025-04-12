@@ -66,8 +66,14 @@ Format the response as JSON like:
     }
 
   } catch (err) {
-    console.error("❌ OpenAI Error:", err.message);
-    res.status(500).json({ error: "AI request failed" });
+    // ✅ Improved Error Logging
+    if (err.response) {
+      console.error("🔴 OpenAI API Error:", err.response.status, err.response.data);
+      res.status(500).json({ error: err.response.data });
+    } else {
+      console.error("❌ OpenAI Request Failed:", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 
@@ -75,5 +81,6 @@ Format the response as JSON like:
 app.listen(port, () => {
   console.log(`🚀 AI server listening on port ${port}`);
 });
+
 
 
