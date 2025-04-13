@@ -28,54 +28,34 @@ app.post('/generate', async (req, res) => {
     return res.status(400).json({ error: "Missing summary" });
   }
 
-  try {
-    const prompt = `
-You are an expert knowledge architect AI.
-Given the following summary, generate an intelligent complex structure:
-Summary: "${summary}"
-
-Return:
-1. A compelling title.
-2. 3–5 cell ideas, each with:
-   - title
-   - content (explanation or insight)
-
-Format the response as JSON like:
-{
-  "title": "...",
-  "cells": [
-    { "title": "...", "content": "..." },
-    { "title": "...", "content": "..." }
-  ]
-}
-`;
-
-    const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4o-2024-05-13",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-    });
-
-    const raw = chatCompletion.choices[0].message.content;
-
-    try {
-      const parsed = JSON.parse(raw);
-      res.json(parsed);
-    } catch (jsonError) {
-      console.error("❌ Failed to parse JSON:", jsonError.message);
-      console.error("⚠️ Raw AI Response:", raw);
-      res.status(500).json({ error: "Invalid AI JSON output" });
-    }
-  } catch (err) {
-    if (err.status) {
-      console.error("🔴 OpenAI API Error:", err.status, err.message);
-      res.status(err.status).json({ error: err.message });
-    } else {
-      console.error("❌ Unknown Error:", err.message);
-      res.status(500).json({ error: "AI request failed" });
-    }
-  }
+  // ✅ Hardcoded response for now (instead of calling OpenAI)
+  res.json({
+    title: "Shaping Tomorrow: The Future of AI in the United States",
+    cells: [
+      {
+        title: "Economic Impact and Job Market Transformation",
+        content: "AI is poised to reshape the economy by automating routine tasks, enhancing productivity, and creating new job categories. However, this transformation will require a strategic approach to workforce retraining and education to mitigate job displacement and ensure equitable growth."
+      },
+      {
+        title: "AI in Healthcare: Revolutionizing Patient Care",
+        content: "AI technologies are revolutionizing healthcare by improving diagnostic accuracy, personalizing treatment plans, and enhancing patient monitoring. The integration of AI in healthcare promises to increase efficiency, reduce costs, and improve patient outcomes, but also raises important ethical and privacy concerns that must be addressed."
+      },
+      {
+        title: "Ethical and Regulatory Frameworks",
+        content: "As AI becomes more integrated into society, developing robust ethical and regulatory frameworks is crucial. These frameworks need to address issues such as data privacy, algorithmic bias, and accountability to ensure that AI technologies are developed and deployed responsibly, fostering public trust and safeguarding individual rights."
+      },
+      {
+        title: "AI in National Security and Defense",
+        content: "The adoption of AI in national security and defense is transforming military operations, intelligence analysis, and cybersecurity. AI-driven technologies can enhance decision-making, automate surveillance, and improve threat detection. However, the deployment of AI in this domain necessitates stringent oversight to prevent misuse and ensure compliance with international laws."
+      },
+      {
+        title: "Public Perception and Trust in AI",
+        content: "Public perception and trust in AI are pivotal to its widespread acceptance and success. Efforts to educate the public about AI, its benefits, and potential risks are essential. Transparency in AI development processes and outcomes can help build trust, dispel myths, and foster a collaborative environment for AI innovation."
+      }
+    ]
+  });
 });
+
 
 // ✅ Start the server
 app.listen(port, () => {
