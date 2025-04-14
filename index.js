@@ -76,7 +76,7 @@ app.post('/generate', async (req, res) => {
           },
           {
             "title": "Cell title 3",
-          "content": "Explanation or insight for cell 3"
+            "content": "Explanation or insight for cell 3"
           }
         ]
       }
@@ -91,9 +91,9 @@ app.post('/generate', async (req, res) => {
       temperature: 0.7,
     });
 
+    // ✅ Clean and parse AI output
     let raw = chatCompletion.choices[0].message.content.trim();
 
-    // ✅ Remove ```json ... ``` if present
     if (raw.startsWith("```")) {
       raw = raw.replace(/```(?:json)?|```/g, "").trim();
     }
