@@ -53,41 +53,37 @@ app.post('/generate', async (req, res) => {
   }
 
   // ✅ REAL AI MODE
-  try {
-    const prompt = `
-    You are an expert knowledge architect AI.
+const prompt = `
+  You are an expert knowledge architect AI.
 
-    Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
+  Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
 
-    Summary: "${summary}"
+  Summary: "${summary}"
 
-    Respond ONLY with a JSON object in this format:
+  Respond ONLY with a JSON object in this format:
 
-    {
-      "title": "Your generated complex title",
-      "cells": [
-        {
-          "title": "Cell title 1",
-          "content": "Explanation or insight for cell 1"
-        },
-        {
-          "title": "Cell title 2",
-          "content": "Explanation or insight for cell 2"
-        },
-        {
-          "title": "Cell title 3",
-          "content": "Explanation or insight for cell 3"
-        }
-      ]
-    }
+  {
+    "title": "Your generated complex title",
+    "cells": [
+      {
+        "title": "Cell title 1",
+        "content": "Explanation or insight for cell 1"
+      },
+      {
+        "title": "Cell title 2",
+        "content": "Explanation or insight for cell 2"
+      },
+      {
+        "title": "Cell title 3",
+        "content": "Explanation or insight for cell 3"
+      }
+    ]
+  }
 
-    IMPORTANT: Do not include markdown, headings, or text outside the JSON object.
-    `;
-
-
-Each cell should explain one key idea clearly.
-Only return valid JSON, nothing else.
+  Each cell should explain one key idea clearly.
+  Only return valid JSON, nothing else.
 `;
+
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o-2024-05-13",
