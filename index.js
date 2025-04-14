@@ -53,37 +53,37 @@ app.post('/generate', async (req, res) => {
   }
 
   // ✅ REAL AI MODE
-const prompt = `
-  You are an expert knowledge architect AI.
+  try {
+    const prompt = `
+      You are an expert knowledge architect AI.
 
-  Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
+      Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
 
-  Summary: "${summary}"
+      Summary: "${summary}"
 
-  Respond ONLY with a JSON object in this format:
+      Respond ONLY with a JSON object in this format:
 
-  {
-    "title": "Your generated complex title",
-    "cells": [
       {
-        "title": "Cell title 1",
-        "content": "Explanation or insight for cell 1"
-      },
-      {
-        "title": "Cell title 2",
-        "content": "Explanation or insight for cell 2"
-      },
-      {
-        "title": "Cell title 3",
-        "content": "Explanation or insight for cell 3"
+        "title": "Your generated complex title",
+        "cells": [
+          {
+            "title": "Cell title 1",
+            "content": "Explanation or insight for cell 1"
+          },
+          {
+            "title": "Cell title 2",
+            "content": "Explanation or insight for cell 2"
+          },
+          {
+            "title": "Cell title 3",
+          "content": "Explanation or insight for cell 3"
+          }
+        ]
       }
-    ]
-  }
 
-  Each cell should explain one key idea clearly.
-  Only return valid JSON, nothing else.
-`;
-
+      Each cell should explain one key idea clearly.
+      Only return valid JSON, nothing else.
+    `;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o-2024-05-13",
@@ -91,20 +91,22 @@ const prompt = `
       temperature: 0.7,
     });
 
-    const raw = chatCompletion.choices[0].message.content;
+    let raw = chatCompletion.choices[0].message.content.trim();
 
-    try {
-      const parsed = JSON.parse(raw);
-      res.json(parsed);
-    } catch (jsonError) {
-      console.error("❌ Failed to parse JSON:", jsonError.message);
-      console.error("⚠️ Raw AI Response:", raw);
-      res.status(500).json({ error: "Invalid AI JSON output" });
+    // ✅ Remove ```json ... ``` if present
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/```(?:json)?|```/g, "").trim();
     }
-  } catch (err) {
-    console.error("❌ AI Request Error:", err.message);
-    res.status(500).json({ error: "AI request failed" });
+
+    const parsed = JSON.parse(raw);
+    res.json(parsed);
+
+  } catch (jsonError) {
+    console.error("❌ Failed to parse JSON:", jsonError.message);
+    console.error("⚠️ Raw AI Response:", raw);
+    res.status(500).json({ error: "Invalid AI JSON output" });
   }
+
 });
 
 // ✅ Start server
