@@ -55,19 +55,35 @@ app.post('/generate', async (req, res) => {
   // ✅ REAL AI MODE
   try {
     const prompt = `
-You are an expert knowledge architect AI.
-Given the following summary, generate a knowledge Complex:
+    You are an expert knowledge architect AI.
 
-Summary: "${summary}"
+    Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
 
-Return a JSON object like:
-{
-  "title": "...",
-  "cells": [
-    { "title": "...", "content": "..." },
-    { "title": "...", "content": "..." }
-  ]
-}
+    Summary: "${summary}"
+
+    Respond ONLY with a JSON object in this format:
+
+    {
+      "title": "Your generated complex title",
+      "cells": [
+        {
+          "title": "Cell title 1",
+          "content": "Explanation or insight for cell 1"
+        },
+        {
+          "title": "Cell title 2",
+          "content": "Explanation or insight for cell 2"
+        },
+        {
+          "title": "Cell title 3",
+          "content": "Explanation or insight for cell 3"
+        }
+      ]
+    }
+
+    IMPORTANT: Do not include markdown, headings, or text outside the JSON object.
+    `;
+
 
 Each cell should explain one key idea clearly.
 Only return valid JSON, nothing else.
