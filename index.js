@@ -53,37 +53,37 @@ app.post('/generate', async (req, res) => {
   }
 
   // ✅ REAL AI MODE
+
   try {
     const prompt = `
-      You are an expert knowledge architect AI.
+  You are an expert knowledge architect AI.
 
-      Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
+  Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
 
-      Summary: "${summary}"
+  Only respond with valid JSON. Do not include markdown, bullet points, or commentary.
 
-      Respond ONLY with a JSON object in this format:
+  Use this format exactly:
 
+  {
+    "title": "The generated complex title",
+    "cells": [
       {
-        "title": "Your generated complex title",
-        "cells": [
-          {
-            "title": "Cell title 1",
-            "content": "Explanation or insight for cell 1"
-          },
-          {
-            "title": "Cell title 2",
-            "content": "Explanation or insight for cell 2"
-          },
-          {
-            "title": "Cell title 3",
-            "content": "Explanation or insight for cell 3"
-          }
-        ]
+        "title": "First cell title",
+        "content": "Explanation or insight for the first cell"
+      },
+      {
+        "title": "Second cell title",
+        "content": "Explanation or insight for the second cell"
+      },
+      {
+        "title": "Third cell title",
+        "content": "Explanation or insight for the third cell"
       }
+    ]
+  }
 
-      Each cell should explain one key idea clearly.
-      Only return valid JSON, nothing else.
-    `;
+  Summary: "${summary}"
+  `;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o-2024-05-13",
@@ -91,7 +91,6 @@ app.post('/generate', async (req, res) => {
       temperature: 0.7,
     });
 
-    // ✅ Clean and parse AI output
     let raw = chatCompletion.choices[0].message.content.trim();
 
     if (raw.startsWith("```")) {
@@ -101,10 +100,9 @@ app.post('/generate', async (req, res) => {
     const parsed = JSON.parse(raw);
     res.json(parsed);
 
-  } catch (jsonError) {
-    console.error("❌ Failed to parse JSON:", jsonError.message);
-    console.error("⚠️ Raw AI Response:", raw);
-    res.status(500).json({ error: "Invalid AI JSON output" });
+  } catch (err) {
+    console.error("❌ Failed to process AI response:", err.message);
+    res.status(500).json({ error: "Invalid AI JSON output or request failed" });
   }
 
 });
