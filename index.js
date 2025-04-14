@@ -96,7 +96,7 @@ app.post('/generate', async (req, res) => {
     if (raw.startsWith("```")) {
       raw = raw.replace(/```(?:json)?|```/g, "").trim();
     }
-
+    console.log("🤖 Raw AI Response:\n", raw);
     const parsed = JSON.parse(raw);
     res.json(parsed);
 
