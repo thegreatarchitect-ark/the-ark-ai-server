@@ -23,9 +23,9 @@ app.get('/', (req, res) => {
   res.send('🧠 The Ark AI Backend is working!');
 });
 
-// ✅ AI Generation Route
+// ✅ AI Generation Route – For Complex + Cells
 app.post('/generate', async (req, res) => {
-  const { summary } = req.body;
+  const { summary, tone } = req.body;
 
   if (!summary) {
     return res.status(400).json({ error: "Missing summary" });
@@ -53,37 +53,44 @@ app.post('/generate', async (req, res) => {
   }
 
   // ✅ REAL AI MODE
-
   try {
     const prompt = `
-  You are an expert knowledge architect AI.
+You are an expert knowledge architect AI.
 
-  Your task: Given the summary below, generate a structured JSON representing a knowledge complex.
+Given the following summary, generate a structured JSON object for a knowledge complex.
 
-  Only respond with valid JSON. Do not include markdown, bullet points, or commentary.
+Tone: ${tone || 'default'}
 
-  Use this format exactly:
+Respond ONLY with valid JSON using this format:
 
-  {
-    "title": "The generated complex title",
-    "cells": [
-      {
-        "title": "First cell title",
-        "content": "Explanation or insight for the first cell"
-      },
-      {
-        "title": "Second cell title",
-        "content": "Explanation or insight for the second cell"
-      },
-      {
-        "title": "Third cell title",
-        "content": "Explanation or insight for the third cell"
-      }
-    ]
-  }
+{
+  "title": "Generated complex title",
+  "cells": [
+    {
+      "title": "First cell title",
+      "content": "Explanation or insight for the first cell"
+    },
+    {
+      "title": "Second cell title",
+      "content": "Explanation or insight for the second cell"
+    },
+    {
+      "title": "Third cell title",
+      "content": "Explanation or insight for the third cell"
+    },
+    {
+      "title": "Fourth cell title",
+      "content": "Explanation or insight for the fourth cell"
+    },
+    {
+      "title": "Fifth cell title",
+      "content": "Explanation or insight for the fifth cell"
+    }
+  ]
+}
 
-  Summary: "${summary}"
-  `;
+Summary: "${summary}"
+`;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o-2024-05-13",
@@ -96,6 +103,7 @@ app.post('/generate', async (req, res) => {
     if (raw.startsWith("```")) {
       raw = raw.replace(/```(?:json)?|```/g, "").trim();
     }
+
     console.log("🤖 Raw AI Response:\n", raw);
     const parsed = JSON.parse(raw);
     res.json(parsed);
@@ -104,8 +112,8 @@ app.post('/generate', async (req, res) => {
     console.error("❌ Failed to process AI response:", err.message);
     res.status(500).json({ error: "Invalid AI JSON output or request failed" });
   }
-
 });
+
 // ✅ AI Title + Summary Generation Route
 app.post('/generate-title-summary', async (req, res) => {
   const { title, tone } = req.body;
@@ -120,12 +128,12 @@ You are a knowledge architect AI.
 
 Given a topic title: "${title}"
 Generate:
-1. A polished or creative version of the title (based on tone)
+1. A refined or creative version of the title
 2. A short, compelling summary of what the complex could explore
 
 Tone: ${tone || 'default'}
 
-Only respond with a JSON like this:
+Only respond with this JSON structure:
 
 {
   "title": "Refined title",
@@ -133,7 +141,7 @@ Only respond with a JSON like this:
 }
 
 Do NOT include any text outside of the JSON object.
-    `;
+`;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o-2024-05-13",
@@ -143,7 +151,6 @@ Do NOT include any text outside of the JSON object.
 
     let raw = chatCompletion.choices[0].message.content.trim();
 
-    // Clean out markdown if necessary
     if (raw.startsWith("```")) {
       raw = raw.replace(/```(?:json)?|```/g, "").trim();
     }
@@ -161,5 +168,4 @@ Do NOT include any text outside of the JSON object.
 app.listen(port, () => {
   console.log(`🚀 The Ark AI server is running on port ${port}`);
 });
-
 
