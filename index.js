@@ -164,6 +164,60 @@ Do NOT include any text outside of the JSON object.
   }
 });
 
+// ✅ AI Simulation Suggestion Route
+app.post('/generate-cell-simulation', async (req, res) => {
+  const { request } = req.body;
+
+  if (!request || typeof request !== "string") {
+    return res.status(400).json({ error: "Missing or invalid request input" });
+  }
+
+  try {
+    const prompt = `
+You are an advanced knowledge simulation AI assistant.
+
+A user is building an interactive cell inside a knowledge complex. Based on their input, suggest 3–5 possible simulation ideas they could use to visualize or explore the topic.
+
+Each suggestion must include:
+- a short, clear title (as a string)
+- a concise description of what it would do (max 3 sentences)
+
+Output ONLY valid JSON using this format:
+{
+  "suggestions": [
+    {
+      "title": "Title of the simulation idea",
+      "description": "What the simulation does, in 1–3 sentences."
+    },
+    ...
+  ]
+}
+
+User Input:
+"${request}"
+`;
+
+    const chatCompletion = await openai.chat.completions.create({
+      model: "gpt-4o-2024-05-13",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    let raw = chatCompletion.choices[0].message.content.trim();
+
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/```(?:json)?|```/g, "").trim();
+    }
+
+    const parsed = JSON.parse(raw);
+    res.json(parsed);
+
+  } catch (err) {
+    console.error("❌ Simulation AI Error:", err.message);
+    res.status(500).json({ error: "Failed to generate simulation suggestions" });
+  }
+});
+
 // ✅ Start server
 app.listen(port, () => {
   console.log(`🚀 The Ark AI server is running on port ${port}`);
