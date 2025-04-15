@@ -106,6 +106,56 @@ app.post('/generate', async (req, res) => {
   }
 
 });
+// ✅ AI Title + Summary Generation Route
+app.post('/generate-title-summary', async (req, res) => {
+  const { title, tone } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: "Missing title" });
+  }
+
+  try {
+    const prompt = `
+You are a knowledge architect AI.
+
+Given a topic title: "${title}"
+Generate:
+1. A polished or creative version of the title (based on tone)
+2. A short, compelling summary of what the complex could explore
+
+Tone: ${tone || 'default'}
+
+Only respond with a JSON like this:
+
+{
+  "title": "Refined title",
+  "summary": "Short summary for the complex"
+}
+
+Do NOT include any text outside of the JSON object.
+    `;
+
+    const chatCompletion = await openai.chat.completions.create({
+      model: "gpt-4o-2024-05-13",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    let raw = chatCompletion.choices[0].message.content.trim();
+
+    // Clean out markdown if necessary
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/```(?:json)?|```/g, "").trim();
+    }
+
+    const parsed = JSON.parse(raw);
+    res.json(parsed);
+
+  } catch (err) {
+    console.error("❌ Title + Summary AI Error:", err.message);
+    res.status(500).json({ error: "Failed to generate title and summary" });
+  }
+});
 
 // ✅ Start server
 app.listen(port, () => {
