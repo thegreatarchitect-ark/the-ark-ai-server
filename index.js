@@ -173,29 +173,55 @@ app.post('/generate-cell-simulation', async (req, res) => {
   }
 
   try {
-    const prompt = `
-You are an advanced knowledge simulation AI assistant.
+const prompt = `
+You are an advanced knowledge simulation design AI.
 
-A user is building an interactive cell inside a knowledge complex. Based on their input, suggest 3–5 possible simulation ideas they could use to visualize or explore the topic.
+A user is building a dynamic simulation inside a knowledge cell. Based on their input, generate 3–5 simulation suggestions.
 
 Each suggestion must include:
-- a short, clear title (as a string)
-- a concise description of what it would do (max 3 sentences)
+- "title": a short name
+- "type": one of ["slider", "forecast", "logic-tree", "map", "animated"]
+- "description": 1–2 sentences explaining what the simulation does
+- "config": an object with slider or logic data (examples below)
 
-Output ONLY valid JSON using this format:
+Respond ONLY with valid JSON in this format:
+
 {
   "suggestions": [
     {
-      "title": "Title of the simulation idea",
-      "description": "What the simulation does, in 1–3 sentences."
+      "title": "📊 Tax vs Poverty",
+      "type": "slider",
+      "description": "Adjust tax rate to see poverty rate changes.",
+      "config": {
+        "sliders": [
+          { "label": "Tax Rate", "min": 0, "max": 100, "default": 30, "unit": "%" }
+        ],
+        "output": "povertyRateChart"
+      }
     },
-    ...
+    {
+      "title": "🧭 Policy Choices",
+      "type": "logic-tree",
+      "description": "Explore outcomes based on subsidy decisions.",
+      "config": {
+        "nodes": [
+          { "id": "start", "label": "Increase subsidies?" },
+          { "id": "yes", "label": "Yes → Deficit" },
+          { "id": "no", "label": "No → Slower growth" }
+        ],
+        "connections": [
+          { "from": "start", "to": "yes" },
+          { "from": "start", "to": "no" }
+        ]
+      }
+    }
   ]
 }
 
 User Input:
 "${request}"
 `;
+
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o-2024-05-13",
